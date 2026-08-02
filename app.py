@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 
 # ----------------------------
 # Page Configuration
@@ -27,14 +28,31 @@ st.caption("RAG-Based Programming Learning Assistant")
 with st.sidebar:
     st.header("📂 Document Management")
 
-    uploaded_files = st.file_uploader(
-        "Upload Programming PDFs",
-        type=["pdf"],
-        accept_multiple_files=True
-    )
+uploaded_files = st.file_uploader(
+    "Upload Programming PDFs",
+    type=["pdf"],
+    accept_multiple_files=True
+)
+
+if uploaded_files:
+
+    st.success(f"{len(uploaded_files)} file(s) selected")
+
+    for file in uploaded_files:
+        st.write("📄", file.name)
 
     if st.button("📚 Process Documents"):
-        st.success("Documents processed successfully! (We'll implement this next)")
+
+        os.makedirs("data", exist_ok=True)
+
+        for file in uploaded_files:
+
+            save_path = os.path.join("data", file.name)
+
+            with open(save_path, "wb") as f:
+                f.write(file.getbuffer())
+
+        st.success("Documents uploaded successfully!")
 
     st.divider()
 
