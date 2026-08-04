@@ -2,13 +2,11 @@ from rag.embeddings import generate_embedding
 from rag.vectorstore import search
 
 
-def retrieve_context(query, top_k=5):
-    """
-    Retrieve the most relevant document chunks for a query.
-    """
+def retrieve_context(query, top_k=10):
 
     query_embedding = generate_embedding(query)
 
-    results = search(query_embedding, k=top_k)
+    if query_embedding is None:
+        return []
 
-    return results
+    return search(query_embedding, k=top_k)

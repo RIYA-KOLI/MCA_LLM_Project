@@ -1,23 +1,36 @@
-import os
-from dotenv import load_dotenv
-from google import genai
-from config import EMBEDDING_MODEL
+from sentence_transformers import SentenceTransformer
 
-# Load environment variables
-load_dotenv()
-
-# Create Gemini client
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# Load model only once
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def generate_embedding(text):
     """
-    Generate embedding for a single chunk of text.
+    Generate embedding for a single query.
     """
 
-    response = client.models.embed_content(
-        model=EMBEDDING_MODEL,
-        contents=text
+    embedding = model.encode(
+        text,
+        convert_to_numpy=True
     )
 
-    return response.embeddings[0].values
+    return embedding.tolist()
+
+
+def generate_embeddings(chunks):
+    """
+    Generate embeddings for document chunks.
+    """
+
+    texts = [
+        chunk["text"]
+        for chunk in chunks
+    ]
+
+    embeddings = model.encode(
+        texts,
+        convert_to_numpy=True,
+        show_progress_bar=True
+    )
+
+    return embeddings.tolist()

@@ -1,0 +1,223 @@
+/* ===========================
+   Hide Streamlit Branding
+=========================== */
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: transparent;
+}
+
+/* ===========================
+   Main Background
+=========================== */
+
+.stApp {
+    background: #0F172A;
+    color: white;
+}
+
+/* ===========================
+   Sidebar
+=========================== */
+
+section[data-testid="stSidebar"] {
+    background: #111827;
+    border-right: 1px solid #2D3748;
+}
+
+/* ===========================
+   Hero Title
+=========================== */
+
+.hero-title{
+    font-size:48px;
+    font-weight:800;
+    color:white;
+    margin-bottom:5px;
+}
+
+.hero-subtitle{
+    color:#94A3B8;
+    font-size:18px;
+    margin-bottom:20px;
+}
+
+/* ===========================
+   AI Status Cards
+=========================== */
+
+.status-card{
+    background:#1E293B;
+    border-radius:15px;
+    padding:18px;
+    text-align:center;
+    border:1px solid #334155;
+    transition:0.3s;
+}
+
+.status-card:hover{
+    transform:translateY(-5px);
+    border-color:#3B82F6;
+}
+
+.status-number{
+    font-size:30px;
+    font-weight:bold;
+    color:#38BDF8;
+}
+
+.status-text{
+    color:#CBD5E1;
+}
+
+/* ===========================
+   Chat Messages
+=========================== */
+
+.stChatMessage{
+    border-radius:18px;
+    padding:10px;
+    border:1px solid #293548;
+}
+
+/* ===========================
+   Buttons
+=========================== */
+
+.stButton>button{
+
+    width:100%;
+
+    border-radius:12px;
+
+    background:#2563EB;
+
+    color:white;
+
+    border:none;
+
+    height:48px;
+
+    font-weight:bold;
+
+    transition:0.3s;
+}
+
+.stButton>button:hover{
+
+    background:#3B82F6;
+
+    transform:scale(1.02);
+}
+
+/* ===========================
+   Upload Boxes
+=========================== */
+
+[data-testid="stFileUploader"]{
+
+    border-radius:15px;
+
+    border:2px dashed #475569;
+
+    background:#111827;
+
+}
+
+/* ===========================
+   Metrics
+=========================== */
+
+[data-testid="metric-container"]{
+
+    background:#1E293B;
+
+    border-radius:15px;
+
+    padding:15px;
+
+    border:1px solid #334155;
+
+}
+
+/* ===========================
+   Chat Input
+=========================== */
+
+[data-testid="stChatInput"]{
+
+    border-radius:18px;
+
+}
+
+/* ===========================
+   Expanders
+=========================== */
+
+.streamlit-expanderHeader{
+
+    font-weight:bold;
+
+    color:white;
+
+}
+
+/* ===========================
+   Scrollbar
+=========================== */
+
+::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#334155;
+
+    border-radius:20px;
+
+}
+
+/* ===========================
+   Source Chips
+=========================== */
+
+.source-chip{
+    display:inline-block;
+    margin:6px 8px 6px 0;
+    padding:10px 16px;
+
+    background:#1E293B;
+
+    border:1px solid #334155;
+
+    border-radius:999px;
+
+    color:white;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:0.25s;
+
+    cursor:pointer;
+}
+
+.source-chip:hover{
+
+    background:#2563EB;
+
+    border-color:#3B82F6;
+
+    transform:translateY(-2px);
+}

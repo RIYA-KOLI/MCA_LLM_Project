@@ -1,4 +1,4 @@
-def chunk_documents(documents, chunk_size=1000, overlap=200):
+def chunk_documents(documents, chunk_size=1500, overlap=150):
     """
     Split documents into overlapping text chunks.
     """
