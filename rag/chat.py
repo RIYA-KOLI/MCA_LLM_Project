@@ -1,72 +1,66 @@
-import os
-from dotenv import load_dotenv
-from google import genai
-
-from config import CHAT_MODEL
 from rag.retrievers import retrieve_context
+from rag.llm import generate_response
 
-# Load environment variables
-load_dotenv()
 
-# Gemini Client
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+MAX_CONTEXT_CHARS = 4000
 
 
 def ask_ai(question):
 
-    # Retrieve relevant chunks
-    chunks = retrieve_context(question)
+    # Retrieve fewer, more relevant chunks
+    chunks = retrieve_context(
+        question,
+        top_k=4
+    )
 
     if not chunks:
-
         return (
-            "This is a demonstration build. Due to temporary Gemini API quota limitations during the presentation, live retrieval is unavailable. The application architecture, PDF processing, vector database, source tracking, image upload, and chat interface have been successfully implemented.",
+            "I could not find that information in the uploaded documents.",
             []
         )
 
-    # Merge context
-    context = "\n\n".join(
-        [chunk["text"] for chunk in chunks]
-    )
+    context_parts = []
+    current_length = 0
+
+    for chunk in chunks:
+
+        text = chunk["text"].strip()
+
+        if current_length + len(text) > MAX_CONTEXT_CHARS:
+            break
+
+        context_parts.append(text)
+        current_length += len(text)
+
+    context = "\n\n".join(context_parts)
 
     prompt = f"""
-You are an AI Programming Assistant.
+You are an expert Programming Tutor.
 
-Answer ONLY using the context below.
+STRICT RULES:
 
-If the answer is not available,
-say:
-"I could not find that information in the uploaded documents."
+1. Answer ONLY using the provided context.
+2. Never use outside knowledge.
+3. If the answer is not found, reply exactly:
+I could not find that information in the uploaded documents.
+4. If the context contains code:
+   - Return ONE markdown code block.
+   - After the code block, explain it briefly.
+5. Keep answers concise.
 
-========================
-Context
-========================
+====================
+CONTEXT
+====================
 
 {context}
 
-========================
-Question
-========================
+====================
+QUESTION
+====================
 
 {question}
 """
 
-    try:
-        response = client.models.generate_content(
-            model=CHAT_MODEL,
-            contents=prompt
-        )
-
-        answer = response.text
-
-    except Exception as e:
-
-        answer = (
-            "⚠️ Gemini is currently unavailable or experiencing high demand.\n\n"
-            "Please try again in a few moments.\n\n"
-            f"Technical details: {e}"
-        )
+    answer = generate_response(prompt)
 
     return answer, chunks

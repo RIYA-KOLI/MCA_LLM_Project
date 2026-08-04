@@ -1,46 +1,71 @@
+import os
+import pickle
+
 import faiss
 import numpy as np
-import pickle
-import os
+import streamlit as st
 
 INDEX_PATH = "data/faiss_index.index"
 METADATA_PATH = "data/metadata.pkl"
 
-dimension = 384
-
-index = faiss.IndexFlatL2(dimension)
-
-metadata = []
+DIMENSION = 384
 
 
-def save_index():
-    faiss.write_index(index, INDEX_PATH)
+# ==========================================================
+# Load FAISS Once
+# ==========================================================
 
-    with open(METADATA_PATH, "wb") as f:
-        pickle.dump(metadata, f)
+@st.cache_resource
+def load_vector_store():
 
-
-def load_index():
-    global index
-    global metadata
+    index = faiss.IndexFlatL2(DIMENSION)
+    metadata = []
 
     if os.path.exists(INDEX_PATH):
-        print("Loading FAISS index...")
+
         index = faiss.read_index(INDEX_PATH)
 
     if os.path.exists(METADATA_PATH):
-        print("Loading metadata...")
 
         with open(METADATA_PATH, "rb") as f:
+
             metadata = pickle.load(f)
 
-    print("Loaded vectors:", index.ntotal)
-    print("Loaded metadata:", len(metadata))
+    return index, metadata
 
+
+index, metadata = load_vector_store()
+
+
+# ==========================================================
+# Save
+# ==========================================================
+
+def save_index():
+
+    faiss.write_index(
+        index,
+        INDEX_PATH
+    )
+
+    with open(METADATA_PATH, "wb") as f:
+
+        pickle.dump(
+            metadata,
+            f
+        )
+
+
+# ==========================================================
+# Add New Embeddings
+# ==========================================================
 
 def add_embeddings(chunks, embeddings):
 
-    vectors = np.array(embeddings).astype("float32")
+    vectors = np.asarray(
+        embeddings,
+        dtype=np.float32
+    )
 
     index.add(vectors)
 
@@ -48,49 +73,52 @@ def add_embeddings(chunks, embeddings):
 
     save_index()
 
+    # Refresh cache after modifying the index
+    load_vector_store.clear()
 
-def search(query_embedding, k=10):
 
-    print("Metadata length:", len(metadata))
+# ==========================================================
+# Search
+# ==========================================================
 
-    if query_embedding is None:
+def search(query_embedding, k=5):
+
+    if not metadata:
+
         return []
 
-    # If metadata is empty, return nothing
-    if len(metadata) == 0:
-        return []
+    query = np.asarray(
+        [query_embedding],
+        dtype=np.float32
+    )
 
-    query = np.array([query_embedding]).astype("float32")
-
-    distances, indices = index.search(query, k)
+    distances, indices = index.search(
+        query,
+        k
+    )
 
     results = []
 
-    for distance, idx in zip(distances[0], indices[0]):
+    for distance, idx in zip(
+        distances[0],
+        indices[0]
+    ):
 
-        # Skip invalid FAISS results
-        if idx == -1:
-            continue
+        if idx < 0 or idx >= len(metadata):
 
-        # Skip out-of-range indices
-        if idx >= len(metadata):
             continue
 
         result = metadata[idx].copy()
 
-        distance = float(distance)
+        similarity = 100 / (1 + float(distance))
 
-        similarity = 100 / (1 + distance)
-
-        result["score"] = round(similarity, 2)
+        result["score"] = round(
+            similarity,
+            2
+        )
 
         if similarity >= 20:
+
             results.append(result)
 
     return results
-
-# -----------------------------------
-# Automatically load saved FAISS index
-# -----------------------------------
-
-load_index()

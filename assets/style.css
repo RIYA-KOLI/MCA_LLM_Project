@@ -221,3 +221,82 @@ section[data-testid="stSidebar"] {
 
     transform:translateY(-2px);
 }
+
+/* ===========================
+   Code Card
+=========================== */
+
+.code-card{
+
+    background:#111827;
+
+    border:1px solid #334155;
+
+    border-radius:18px;
+
+    padding:18px;
+
+    margin-top:15px;
+
+    margin-bottom:15px;
+
+}
+
+.code-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:12px;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    color:#38BDF8;
+
+}
+
+.code-actions{
+
+    margin-top:15px;
+
+}
+
+.code-output{
+
+    margin-top:20px;
+
+    background:#0B1220;
+
+    border-left:4px solid #22C55E;
+
+    border-radius:10px;
+
+    padding:15px;
+
+}
+
+.code-card:hover{
+
+    border-color:#3B82F6;
+
+    transform:translateY(-2px);
+
+    transition:0.25s;
+
+}
+
+.stDownloadButton>button{
+
+    width:100%;
+
+    border-radius:12px;
+
+    height:48px;
+
+}
+
