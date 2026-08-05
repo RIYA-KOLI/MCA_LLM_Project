@@ -60,6 +60,10 @@ def load_uploaded_documents(upload_folder, pdf_files):
 
             text = page.get_text()
 
+            print(f"\nPage {page_num + 1}")
+            print("Characters:", len(text))
+            print(repr(text[:200]))
+
             if text.strip():
 
                 documents.append({
@@ -67,7 +71,7 @@ def load_uploaded_documents(upload_folder, pdf_files):
                     "page_number": page_num + 1,
                     "text": text
                 })
-
+                
         pdf.close()
 
         print("\n========== JAVA PDF ==========")

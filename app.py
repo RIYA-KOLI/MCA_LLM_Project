@@ -1,9 +1,10 @@
 import os
 import re
 import streamlit as st
+from pathlib import Path
 
 from streamlit_mic_recorder import speech_to_text
-
+from vision.caption import analyze_image
 from rag.chat import ask_ai
 from rag.voice import speak
 from rag.processor import (
@@ -20,7 +21,12 @@ from components.code_card import render_code_card
 # ==========================================================
 
 def load_css():
-    with open("assets/style.css", "r", encoding="utf-8") as f:
+    css_path = Path(__file__).parent / "assets" / "style.css"
+
+    print("CSS Path:", css_path)
+    print("Exists:", css_path.exists())
+
+    with open(css_path, "r", encoding="utf-8") as f:
         st.markdown(
             f"<style>{f.read()}</style>",
             unsafe_allow_html=True,
@@ -50,6 +56,13 @@ UPLOAD_FOLDER = "knowledge_base/pdf/uploaded"
 os.makedirs(
     UPLOAD_FOLDER,
     exist_ok=True,
+)
+
+IMAGE_FOLDER = "knowledge_base/images"
+
+os.makedirs(
+    IMAGE_FOLDER,
+    exist_ok=True
 )
 
 
@@ -116,6 +129,11 @@ uploaded_image = st.sidebar.file_uploader(
     type=["png", "jpg", "jpeg"],
 )
 
+analyze_image_btn = st.sidebar.button(
+    "🧠 Analyze Image",
+    use_container_width=True
+)
+
 process_documents = st.sidebar.button(
     "⚙️ Process Documents",
     use_container_width=True,
@@ -162,6 +180,49 @@ if process_documents:
 
             st.sidebar.error(message)
 
+
+# ==========================================
+# Vision AI
+# ==========================================
+
+if analyze_image_btn:
+
+    if uploaded_image is None:
+
+        st.sidebar.warning(
+            "Please upload an image first."
+        )
+
+    else:
+
+        image_path = os.path.join(
+            IMAGE_FOLDER,
+            uploaded_image.name
+        )
+
+        with open(image_path, "wb") as f:
+
+            f.write(uploaded_image.getbuffer())
+
+        with st.spinner("🧠 Analyzing image..."):
+
+            vision_result = analyze_image(image_path)
+
+            try:
+                os.remove(image_path)
+            except:
+                pass
+
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": f"🖼 **Vision AI Analysis**\n\n{vision_result}"
+            }
+        )
+
+        st.rerun()
+
+        
 # ==========================================================
 # Knowledge Base Statistics
 # ==========================================================
@@ -386,6 +447,22 @@ for index, message in enumerate(st.session_state.messages):
                 "No sources available."
             )
 
+# ---------------------------------------
+# Play generated speech
+# ---------------------------------------
+
+if "audio_path" in st.session_state:
+
+    with open(st.session_state.audio_path, "rb") as audio:
+
+        st.audio(
+            audio.read(),
+            format="audio/mp3",
+            autoplay=True,
+        )
+
+    del st.session_state.audio_path
+
 # ==========================================================
 # Voice Input
 # ==========================================================
@@ -443,25 +520,15 @@ if question:
     # Generate Answer
     # -----------------------------
 
-    if uploaded_image is not None:
+    try:
 
-        answer = (
-            "⚠️ Vision AI is temporarily unavailable."
-        )
+        answer, sources = ask_ai(question)
+
+    except Exception as e:
+
+        answer = f"⚠️ Error\n\n{e}"
 
         sources = []
-
-    else:
-
-        try:
-
-            answer, sources = ask_ai(question)
-
-        except Exception as e:
-
-            answer = f"⚠️ Error\n\n{e}"
-
-            sources = []
 
     # -----------------------------
     # Extract Code
@@ -519,19 +586,11 @@ if question:
 
     if voice_text:
 
-        audio_path = speak(answer)
+        st.write("Generating audio...")
 
-        with open(audio_path, "rb") as audio:
+        st.session_state.audio_path = speak(display_answer)
 
-            st.audio(
-
-                audio.read(),
-
-                format="audio/mp3",
-
-                autoplay=True,
-
-            )
+        st.write(st.session_state.audio_path)
 
     # -----------------------------
     # Refresh UI

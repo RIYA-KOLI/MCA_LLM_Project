@@ -51,7 +51,7 @@ def process_uploaded_documents(upload_folder):
             pdfs_to_process
         )
 
-        print("Documents loaded:", len(documents))
+        print(documents[:5])
 
         chunks = chunk_documents(documents)
 
@@ -77,7 +77,11 @@ def process_uploaded_documents(upload_folder):
 
         return True, f"{len(pdfs_to_process)} PDF(s) processed successfully."
 
+        import traceback
+
     except Exception as e:
+
+        traceback.print_exc()
 
         return False, str(e)
 
