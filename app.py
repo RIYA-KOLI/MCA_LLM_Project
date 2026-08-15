@@ -3,6 +3,8 @@ import re
 import streamlit as st
 from pathlib import Path
 
+from auth import signup_user, login_user
+from database import init_db
 from rag.code_runner import run_code
 from streamlit_mic_recorder import speech_to_text
 from vision.caption import analyze_image
@@ -45,8 +47,89 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
 load_css()
 
+init_db()
+
+if not st.session_state.logged_in:
+
+    st.title("🔐 Login System")
+
+    login_tab, signup_tab = st.tabs(
+        ["Login", "Signup"]
+    )
+
+    with login_tab:
+
+        email = st.text_input(
+            "Email",
+            key="login_email"
+        )
+
+        password = st.text_input(
+            "Password",
+            type="password",
+            key="login_password"
+        )
+
+        if st.button("Login"):
+
+            if login_user(
+                email,
+                password
+            ):
+
+                st.session_state.logged_in = True
+
+                st.success(
+                    "Login successful."
+                )
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    "Invalid credentials."
+                )
+
+    with signup_tab:
+
+        name = st.text_input(
+            "Name"
+        )
+
+        email = st.text_input(
+            "Email",
+            key="signup_email"
+        )
+
+        password = st.text_input(
+            "Password",
+            type="password",
+            key="signup_password"
+        )
+
+        if st.button("Create Account"):
+
+            success, msg = signup_user(
+                name,
+                email,
+                password
+            )
+
+            if success:
+
+                st.success(msg)
+
+            else:
+
+                st.error(msg)
+
+    st.stop()
 
 # ==========================================================
 # Upload Folder
@@ -118,6 +201,12 @@ for column, (icon, title) in zip(
 # ==========================================================
 
 st.sidebar.title("📂 Document Management")
+
+if st.sidebar.button("🚪 Logout"):
+
+    st.session_state.logged_in = False
+
+    st.rerun()
 
 uploaded_files = st.sidebar.file_uploader(
     "Upload Programming PDFs",
