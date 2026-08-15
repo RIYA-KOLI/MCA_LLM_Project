@@ -78,18 +78,20 @@ def run_javascript(code):
 
 def run_java(code):
 
-    temp_dir = tempfile.mkdtemp()
-
     match = re.search(
-        r"public\s+class\s+(\w+)",
+        r'public\s+class\s+(\w+)',
         code
     )
 
-    class_name = (
-        match.group(1)
-        if match
-        else "Main"
-    )
+    if not match:
+        return (
+            "Java code must contain "
+            "a public class."
+        )
+
+    class_name = match.group(1)
+
+    temp_dir = tempfile.mkdtemp()
 
     java_file = os.path.join(
         temp_dir,
@@ -145,7 +147,7 @@ def run_java(code):
                 os.path.join(temp_dir, file)
             )
 
-        os.rmdir(temp_dir)
+
 
 
 # ---------------- ROUTER ---------------- #
