@@ -3,6 +3,7 @@ import re
 import streamlit as st
 from pathlib import Path
 
+from rag.code_runner import run_code
 from streamlit_mic_recorder import speech_to_text
 from vision.caption import analyze_image
 from rag.chat import ask_ai
@@ -378,10 +379,34 @@ for index, message in enumerate(st.session_state.messages):
                 )
 
             if edit_clicked:
+                st.session_state[f"editing_{index}"] = True
 
-                st.info(
-                    "Editor coming soon."
+            if st.session_state.get(f"editing_{index}", False):
+
+                edited_code = st.text_area(
+                    "Edit Code",
+                    value=message["code"],
+                    height=300,
+                    key=f"editor_{index}"
                 )
+                if st.button(
+                    "Run Edited Code",
+                    key=f"run_edited_btn_{index}"
+                ):
+                    st.success("BUTTON CLICKED")
+
+                    st.write("DEBUG CODE:")
+                    st.code(edited_code)
+
+                    output = run_code(
+                        edited_code,
+                        message["language"]
+                    )
+
+                    st.markdown("### Output")
+                    st.code(output)
+
+
 
         # --------------------------------------
         # Sources
@@ -597,3 +622,4 @@ if question:
     # -----------------------------
 
     st.rerun()
+    

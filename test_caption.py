@@ -6,6 +6,6 @@ image = r"C:\Users\user\Downloads\test.png"
 print("Using image:", image)
 print("Exists:", os.path.exists(image))
 
-result = analyze_image(...)
+result = analyze_image(image)
 
 print(result)
