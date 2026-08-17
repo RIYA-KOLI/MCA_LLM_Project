@@ -1,4 +1,5 @@
 import streamlit as st
+
 from utils.github_service import (
     get_github_profile,
     get_github_repos
@@ -16,6 +17,10 @@ if st.button("Fetch Profile"):
     profile = get_github_profile(username)
 
     if profile:
+
+        # --------------------------
+        # Profile Section
+        # --------------------------
 
         st.image(
             profile["avatar_url"],
@@ -50,11 +55,11 @@ if st.button("Fetch Profile"):
         st.divider()
 
         st.write(
-            f"📍 Location: {profile.get('location', 'Not Available')}"
+            f"📍 Location: {profile.get('location') or 'Not Available'}"
         )
 
         st.write(
-            f"🏢 Company: {profile.get('company', 'Not Available')}"
+            f"🏢 Company: {profile.get('company') or 'Not Available'}"
         )
 
         st.write(
@@ -65,10 +70,12 @@ if st.button("Fetch Profile"):
             st.info(profile["bio"])
 
         # --------------------------
-        # Repositories
+        # Repository Section
         # --------------------------
 
         repos = get_github_repos(username)
+
+        st.divider()
 
         st.subheader("📂 Repositories")
 
@@ -76,13 +83,84 @@ if st.button("Fetch Profile"):
 
             st.markdown(
                 f"""
-                **{repo['name']}**
+**{repo['name']}**
 
-                ⭐ {repo['stargazers_count']}
-                | 🍴 {repo['forks_count']}
-                | 💻 {repo['language']}
-                """
+⭐ {repo['stargazers_count']}
+| 🍴 {repo['forks_count']}
+| 💻 {repo['language'] or 'Not Specified'}
+"""
+            )
+
+        # --------------------------
+        # Language Analysis
+        # --------------------------
+
+        languages = {}
+
+        for repo in repos:
+
+            lang = repo["language"]
+
+            if lang:
+
+                if lang not in languages:
+                    languages[lang] = 0
+
+                languages[lang] += 1
+
+        st.divider()
+
+        st.subheader("📊 Language Usage")
+
+        if languages:
+
+            for lang, count in sorted(
+                languages.items(),
+                key=lambda x: x[1],
+                reverse=True
+            ):
+
+                st.write(
+                    f"💻 {lang}: {count} repositories"
+                )
+
+        else:
+
+            st.info(
+                "No programming language data available."
+            )
+
+        # --------------------------
+        # Most Popular Repository
+        # --------------------------
+
+        if repos:
+
+            top_repo = max(
+                repos,
+                key=lambda x: x["stargazers_count"]
+            )
+
+            st.divider()
+
+            st.subheader(
+                "🏆 Most Popular Repository"
+            )
+
+            st.write(
+                f"**Repository:** {top_repo['name']}"
+            )
+
+            st.write(
+                f"⭐ Stars: {top_repo['stargazers_count']}"
+            )
+
+            st.markdown(
+                f"[🔗 Open Repository]({top_repo['html_url']})"
             )
 
     else:
-        st.error("GitHub user not found.")
+
+        st.error(
+            "GitHub user not found."
+        )
