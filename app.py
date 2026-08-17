@@ -17,6 +17,17 @@ from rag.processor import (
 )
 
 from components.code_card import render_code_card
+from utils.leetcode_service import get_leetcode_profile
+
+
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if "user_email" not in st.session_state:
+    st.session_state["user_email"] = None
+
+if "user_name" not in st.session_state:
+    st.session_state["user_name"] = None
 
 
 # ==========================================================
@@ -48,7 +59,13 @@ st.set_page_config(
 )
 
 if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+    if st.sidebar.button("🚪 Logout"):
+
+        st.session_state["logged_in"] = False
+        st.session_state["user_email"] = None
+        st.session_state["user_name"] = None
+
+        st.rerun()
 
 load_css()
 
@@ -180,6 +197,8 @@ cards = [
     ("🖼️", "Vision AI"),
     ("⚡", "FAISS Search"),
 ]
+
+
 
 for column, (icon, title) in zip(
     [col1, col2, col3, col4],
